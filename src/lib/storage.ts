@@ -27,13 +27,18 @@ export function loadTasks(filter?: TaskFilter): Task[] {
       if (filter.hasDueDate) tasks = tasks.filter((t) => !!t.dueDate);
       if (filter.search) {
         const keyword = filter.search.toLowerCase();
-        tasks = tasks.filter((t) => t.title.toLowerCase().includes(keyword));
+        tasks = tasks.filter(
+          (t) =>
+            t.title.toLowerCase().includes(keyword) ||
+            t.description?.toLowerCase().includes(keyword),
+        );
       }
     }
 
-    return tasks.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    return tasks.sort((a, b) => {
+      if (a.order !== b.order) return a.order - b.order;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   } catch {
     return [];
   }
@@ -53,6 +58,7 @@ export function createTask(
     projectId: input.projectId,
     tags: [],
     dueDate: input.dueDate,
+    order: tasks.filter((t) => t.status !== "done").length,
     createdAt: now,
     updatedAt: now,
   };
@@ -67,6 +73,13 @@ export function updateTask(id: string, updates: Partial<Task>): Task | null {
   const index = tasks.findIndex((t) => t.id === id);
   if (index === -1) return null;
 
+  if (updates.status === "done" && tasks[index].status !== "done") {
+    updates.completedAt = new Date().toISOString();
+  }
+  if (updates.status === "todo" && tasks[index].status === "done") {
+    updates.completedAt = undefined;
+  }
+
   tasks[index] = { ...tasks[index], ...updates, updatedAt: new Date().toISOString() };
   localStorage.setItem(STORE_KEYS.tasks, JSON.stringify(tasks));
   return tasks[index];
@@ -78,6 +91,15 @@ export function deleteTask(id: string): boolean {
   if (filtered.length === tasks.length) return false;
   localStorage.setItem(STORE_KEYS.tasks, JSON.stringify(filtered));
   return true;
+}
+
+export function reorderTasks(orderedIds: string[]): void {
+  const tasks = loadTasks();
+  orderedIds.forEach((id, i) => {
+    const t = tasks.find((t) => t.id === id);
+    if (t) t.order = i;
+  });
+  localStorage.setItem(STORE_KEYS.tasks, JSON.stringify(tasks));
 }
 
 /* ------------------------------------------------------------------ */
@@ -94,7 +116,9 @@ export function loadProjects(): Project[] {
   }
 }
 
-export function createProject(input: Pick<Project, "name" | "description" | "color" | "icon">): Project {
+export function createProject(
+  input: Pick<Project, "name" | "description" | "color" | "icon">,
+): Project {
   const projects = loadProjects();
   const now = new Date().toISOString();
   const project: Project = {
@@ -125,10 +149,18 @@ export function updateProject(id: string, updates: Partial<Project>): Project | 
 }
 
 export function deleteProject(id: string): boolean {
-  let projects = loadProjects();
-  projects = projects.filter((p) => p.id !== id);
-  projects.forEach((p, i) => { p.order = i; });
-  localStorage.setItem(STORE_KEYS.projects, JSON.stringify(projects));
+  const projects = loadProjects();
+  const filtered = projects.filter((p) => p.id !== id);
+  if (filtered.length === projects.length) return false;
+
+  const tasks = loadTasks();
+  const cleaned = tasks.map((t) => (t.projectId === id ? { ...t, projectId: undefined } : t));
+  localStorage.setItem(STORE_KEYS.tasks, JSON.stringify(cleaned));
+
+  filtered.forEach((p, i) => {
+    p.order = i;
+  });
+  localStorage.setItem(STORE_KEYS.projects, JSON.stringify(filtered));
   return true;
 }
 

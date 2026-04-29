@@ -1,63 +1,32 @@
 import { useState, useRef, useMemo, useCallback } from "react";
 import { useProjects, useCreateProject, useDeleteProject, useReorderProjects, useTasks } from "@/hooks";
+import { useUIStore } from "@/stores/ui-store";
+import {
+  InboxIcon,
+  ClockIcon,
+  CalendarIcon,
+  ChevronDown,
+  PlusIcon,
+  TrashIcon,
+  SettingsIcon,
+  SunIcon,
+  MoonIcon,
+} from "@/components/icons";
 
-const InboxIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 12h-6l-2 3H10l-2-3H2" />
-    <path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" />
-  </svg>
-);
-
-const TodayIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <polyline points="12 6 12 12 16 14" />
-  </svg>
-);
-
-const CalendarIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-    <line x1="16" y1="2" x2="16" y2="6" />
-    <line x1="8" y1="2" x2="8" y2="6" />
-    <line x1="3" y1="10" x2="21" y2="10" />
-  </svg>
-);
-
-const ChevronDown = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
-);
-
-const PlusIcon = ({ size = 14 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
-  </svg>
-);
-
-const TrashIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="3 6 5 6 21 6" />
-    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-    <path d="M10 11v6" />
-    <path d="M14 11v6" />
-  </svg>
-);
-
-const SettingsIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-  </svg>
-);
-
-const PROJECT_COLORS = ["#dc4c3e", "#f59e0b", "#22c55e", "#3b82f6", "#8b5cf6", "#ec4899"];
+const PROJECT_COLORS = [
+  "#dc4c3e",
+  "#f59e0b",
+  "#22c55e",
+  "#3b82f6",
+  "#8b5cf6",
+  "#ec4899",
+  "#14b8a6",
+  "#f97316",
+];
 
 const views = [
   { id: "inbox", label: "收集箱", Icon: InboxIcon },
-  { id: "today", label: "今天", Icon: TodayIcon },
+  { id: "today", label: "今天", Icon: ClockIcon },
   { id: "upcoming", label: "计划", Icon: CalendarIcon },
 ];
 
@@ -76,7 +45,13 @@ function reorder<T>(arr: T[], from: number, to: number): T[] {
   return result;
 }
 
-export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectChange, onOpenSettings }: SidebarProps) {
+export function Sidebar({
+  activeView,
+  onViewChange,
+  activeProjectId,
+  onProjectChange,
+  onOpenSettings,
+}: SidebarProps) {
   const [projectsOpen, setProjectsOpen] = useState(true);
   const [addingProject, setAddingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -84,9 +59,16 @@ export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectCh
   const createMutation = useCreateProject();
   const deleteMutation = useDeleteProject();
   const reorderMutation = useReorderProjects();
+  const { theme, toggleTheme } = useUIStore();
 
   const { data: allTasks = [] } = useTasks();
-  const totalCount = useMemo(() => allTasks.filter((t) => t.status !== "done").length, [allTasks]);
+  const stats = useMemo(() => {
+    const todo = allTasks.filter((t) => t.status !== "done").length;
+    const today = allTasks.filter(
+      (t) => t.dueDate && t.dueDate === new Date().toISOString().slice(0, 10) && t.status !== "done",
+    ).length;
+    return { todo, today };
+  }, [allTasks]);
 
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
@@ -94,7 +76,10 @@ export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectCh
   const startY = useRef(0);
   const itemHeight = useRef(32);
 
-  const activeProjects = useMemo(() => projects.filter((p) => !p.archived), [projects]);
+  const activeProjects = useMemo(
+    () => projects.filter((p) => !p.archived),
+    [projects],
+  );
 
   const handleAddProject = () => {
     const name = newProjectName.trim();
@@ -126,7 +111,10 @@ export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectCh
       dragY.current = e.clientY;
       const delta = dragY.current - startY.current;
       const offset = Math.round(delta / itemHeight.current);
-      const newOver = Math.max(0, Math.min(activeProjects.length - 1, dragIdx + offset));
+      const newOver = Math.max(
+        0,
+        Math.min(activeProjects.length - 1, dragIdx + offset),
+      );
       if (newOver !== overIdx) {
         setOverIdx(newOver);
       }
@@ -148,29 +136,46 @@ export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectCh
   }, [dragIdx, overIdx, activeProjects, reorderMutation]);
 
   const displayProjects = useMemo(() => {
-    if (dragIdx === null || overIdx === null || dragIdx === overIdx) return activeProjects;
+    if (dragIdx === null || overIdx === null || dragIdx === overIdx)
+      return activeProjects;
     return reorder(activeProjects, dragIdx, overIdx);
   }, [activeProjects, dragIdx, overIdx]);
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col select-none bg-surface-secondary">
+    <aside className="flex w-64 shrink-0 flex-col select-none bg-surface-secondary border-r border-border">
+      {/* Logo */}
       <div data-tauri-drag-region className="flex h-11 items-center px-5">
-        <span className="text-sm font-semibold tracking-tight text-primary">Fishodo</span>
+        <span className="text-sm font-bold tracking-tight text-primary">
+          <span className="text-text-primary">Fish</span>odo
+        </span>
+      </div>
+
+      {/* 统计概览 */}
+      <div className="mx-3 mb-1 flex gap-2">
+        <div className="flex-1 rounded-lg bg-surface px-3 py-2 text-center">
+          <p className="text-lg font-bold text-primary">{stats.todo}</p>
+          <p className="text-[10px] font-medium text-text-tertiary">待办</p>
+        </div>
+        <div className="flex-1 rounded-lg bg-surface px-3 py-2 text-center">
+          <p className="text-lg font-bold text-warning">{stats.today}</p>
+          <p className="text-[10px] font-medium text-text-tertiary">今日</p>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
+        {/* 视图导航 */}
         <nav className="flex flex-col gap-0.5 px-2">
           {views.map(({ id, label, Icon }) => (
             <button
               key={id}
               onClick={() => onViewChange(id)}
-              className={`flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors ${
+              className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150 ${
                 activeView === id && !activeProjectId
-                  ? "bg-primary/10 font-medium text-primary"
-                  : "text-text-secondary hover:bg-surface-hover"
+                  ? "bg-primary/10 text-primary shadow-sm"
+                  : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
               }`}
             >
-              <Icon />
+              <Icon size={18} />
               <span>{label}</span>
             </button>
           ))}
@@ -178,20 +183,26 @@ export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectCh
 
         <div className="mx-3 my-3 border-t border-border" />
 
+        {/* 项目区域 */}
         <div className="px-3">
           <button
             onClick={() => setProjectsOpen(!projectsOpen)}
-            className="flex w-full items-center gap-1 py-1 text-xs font-medium text-text-tertiary hover:text-text-secondary"
+            className="flex w-full items-center gap-1.5 py-1.5 text-xs font-semibold text-text-tertiary transition-colors hover:text-text-secondary"
           >
-            <span className={`transition-transform duration-150 ${projectsOpen ? "rotate-0" : "-rotate-90"}`}>
-              <ChevronDown />
+            <span
+              className={`transition-transform duration-200 ${projectsOpen ? "rotate-0" : "-rotate-90"}`}
+            >
+              <ChevronDown size={12} />
             </span>
-            <span>项目</span>
+            <span className="uppercase tracking-wider">项目</span>
+            <span className="ml-auto rounded-full bg-surface px-1.5 py-0.5 text-[10px] text-text-tertiary">
+              {activeProjects.length}
+            </span>
           </button>
 
           <div
-            className={`mt-1 flex flex-col gap-0.5 overflow-hidden transition-all duration-200 ${
-              projectsOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
+            className={`mt-1 flex flex-col gap-0.5 overflow-hidden transition-all duration-300 ${
+              projectsOpen ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"
             }`}
           >
             {displayProjects.map((p, idx) => (
@@ -200,38 +211,53 @@ export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectCh
                 onPointerDown={(e) => handlePointerDown(e, idx)}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
-                className={`group relative flex cursor-grab items-center rounded-md transition-transform duration-150 active:cursor-grabbing ${
-                  dragIdx === idx ? "z-10 scale-[1.02] bg-primary/10 shadow-sm" : ""
-                } ${overIdx === idx && dragIdx !== idx ? "border-b-2 border-primary" : ""}`}
+                className={`group relative flex cursor-grab items-center rounded-md transition-all duration-150 active:cursor-grabbing ${
+                  dragIdx === idx
+                    ? "z-10 scale-[1.02] bg-primary/10 shadow-sm"
+                    : ""
+                } ${
+                  overIdx === idx && dragIdx !== idx
+                    ? "border-b-2 border-primary"
+                    : ""
+                }`}
               >
                 <button
                   onClick={() => onProjectChange(p.id)}
                   onPointerDown={(e) => e.stopPropagation()}
-                  className={`pointer-events-auto flex flex-1 items-center gap-2.5 rounded-md px-1.5 py-1.5 text-sm transition-colors ${
+                  className={`pointer-events-auto flex flex-1 items-center gap-2.5 rounded-md px-2 py-2 text-sm font-medium transition-colors ${
                     activeProjectId === p.id
-                      ? "bg-primary/10 font-medium text-primary"
-                      : "text-text-secondary"
+                      ? "bg-primary/10 text-primary"
+                      : "text-text-secondary hover:bg-surface-hover"
                   }`}
                 >
                   <span
-                    className="flex h-2.5 w-2.5 shrink-0 rounded-full"
+                    className="flex h-3 w-3 shrink-0 rounded-full ring-1 ring-black/10 dark:ring-white/10"
                     style={{ backgroundColor: p.color }}
                   />
-                  <span>{p.name}</span>
+                  <span className="truncate">{p.name}</span>
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDelete(p.id);
                   }}
-                  className="absolute right-0.5 hidden rounded p-1 text-text-tertiary hover:text-danger group-hover:flex"
+                  className="absolute right-1 hidden rounded-md p-1 text-text-tertiary opacity-0 transition-all hover:text-danger group-hover:flex group-hover:opacity-100"
+                  title="删除项目"
                 >
-                  <TrashIcon />
+                  <TrashIcon size={13} />
                 </button>
               </div>
             ))}
+
             {addingProject ? (
-              <div className="flex items-center gap-1 px-1.5 py-1">
+              <div className="flex items-center gap-1.5 px-2 py-1">
+                <span
+                  className="h-3 w-3 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor:
+                      PROJECT_COLORS[projects.length % PROJECT_COLORS.length],
+                  }}
+                />
                 <input
                   autoFocus
                   value={newProjectName}
@@ -249,7 +275,7 @@ export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectCh
                       setNewProjectName("");
                     }
                   }}
-                  className="flex-1 rounded border border-border bg-surface px-2 py-0.5 text-xs text-text-primary outline-none focus:border-primary"
+                  className="flex-1 rounded-md border border-border bg-surface px-2 py-1 text-xs text-text-primary outline-none transition-colors focus:border-primary"
                   placeholder="项目名称"
                 />
                 <button
@@ -257,7 +283,7 @@ export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectCh
                     e.preventDefault();
                     handleAddProject();
                   }}
-                  className="rounded p-0.5 text-text-tertiary hover:text-primary"
+                  className="rounded-md p-1 text-text-tertiary hover:text-primary"
                 >
                   <PlusIcon size={14} />
                 </button>
@@ -265,7 +291,7 @@ export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectCh
             ) : (
               <button
                 onClick={() => setAddingProject(true)}
-                className="flex items-center gap-2 rounded-md px-1.5 py-1.5 text-sm text-text-tertiary hover:bg-surface-hover hover:text-text-secondary"
+                className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm text-text-tertiary transition-colors hover:bg-surface-hover hover:text-text-secondary"
               >
                 <PlusIcon size={14} />
                 <span>添加项目</span>
@@ -275,14 +301,27 @@ export function Sidebar({ activeView, onViewChange, activeProjectId, onProjectCh
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-4 py-2.5 text-xs text-text-tertiary">
-        <span>{totalCount} 项待完成</span>
-        <button
-          onClick={onOpenSettings}
-          className="rounded p-1 text-text-tertiary hover:text-text-primary"
-        >
-          <SettingsIcon />
-        </button>
+      {/* 底部操作栏 */}
+      <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
+        <span className="text-[11px] font-medium text-text-tertiary">
+          {stats.todo} 项待完成
+        </span>
+        <div className="flex items-center gap-0.5">
+          <button
+            onClick={toggleTheme}
+            className="rounded-md p-1.5 text-text-tertiary transition-colors hover:bg-surface-hover hover:text-text-primary"
+            title={theme === "light" ? "切换到深色模式" : "切换到浅色模式"}
+          >
+            {theme === "light" ? <MoonIcon size={16} /> : <SunIcon size={16} />}
+          </button>
+          <button
+            onClick={onOpenSettings}
+            className="rounded-md p-1.5 text-text-tertiary transition-colors hover:bg-surface-hover hover:text-text-primary"
+            title="设置"
+          >
+            <SettingsIcon size={16} />
+          </button>
+        </div>
       </div>
     </aside>
   );

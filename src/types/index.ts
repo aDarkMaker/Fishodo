@@ -7,6 +7,7 @@ export interface Task {
   projectId?: string;
   tags: string[];
   dueDate?: string;
+  order: number;
   createdAt: string;
   updatedAt: string;
   completedAt?: string;

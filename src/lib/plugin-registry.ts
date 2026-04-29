@@ -1,4 +1,4 @@
-import type { PluginManifest, Task } from "@/types";
+import type { PluginManifest } from "@/types";
 
 type PluginHook = (...args: unknown[]) => void | Promise<void>;
 

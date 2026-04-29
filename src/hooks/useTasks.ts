@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Task, TaskFilter } from "@/types";
-import { loadTasks, createTask, updateTask, deleteTask } from "@/lib";
+import { loadTasks, createTask, updateTask, deleteTask, reorderTasks } from "@/lib";
 
 export function useTasks(filter?: TaskFilter) {
   return useQuery({
@@ -13,8 +13,9 @@ export function useCreateTask() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: Pick<Task, "title" | "description" | "priority" | "projectId" | "dueDate">) =>
-      Promise.resolve(createTask(input)),
+    mutationFn: (
+      input: Pick<Task, "title" | "description" | "priority" | "projectId" | "dueDate">,
+    ) => Promise.resolve(createTask(input)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
@@ -38,6 +39,17 @@ export function useDeleteTask() {
 
   return useMutation({
     mutationFn: (id: string) => Promise.resolve(deleteTask(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+}
+
+export function useReorderTasks() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (orderedIds: string[]) => Promise.resolve(reorderTasks(orderedIds)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
