@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #dc4c3e;
+  --color-primary-hover: #c23c2f;
+  --color-surface: #ffffff;
+  --color-surface-secondary: #fafafa;
+  --color-surface-hover: #f3f3f3;
+  --color-border: #eaeaea;
+  --color-text-primary: #202020;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+  --color-success: #22c55e;
+  --color-danger: #dc4c3e;
+  --color-overdue: #d1453b;
+  --font-sans: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar {
+  width: 0;
+}
+
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
