@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="src-tauri/icons/128x128.png" alt="Fishodo" width="128" height="128" />
+  <h1 align="center">Fishodo — 摸鱼利器</h1>
 </p>
-
-<h1 align="center">Fishodo — 摸鱼利器</h1>
 
 <p align="center">
   一个轻量级、高可扩展的跨平台 TODO List 应用
@@ -11,7 +9,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-blue" alt="Platform" />
   <img src="https://img.shields.io/badge/license-GPLv3-green" alt="License" />
-  <img src="https://img.shields.io/badge/rust-stable-orange" alt="Rust" />
+  <img src="https://img.shields.io/badge/wails-v2.13-red" alt="Wails" />
+  <img src="https://img.shields.io/badge/go-1.25-00ADD8" alt="Go" />
 </p>
 
 ---
@@ -31,77 +30,56 @@ Fishodo 不追求功能的大而全，而是专注于：
 
 | 层级 | 技术 | 说明 |
 |------|------|------|
-| 桌面框架 | Tauri v2 | Rust 后端 + WebView 前端，极致轻量 |
-| 前端框架 | React 19 + TypeScript | 企业级 UI 开发 |
-| 构建工具 | Vite | 极快的 HMR 和构建速度 |
-| 包管理 | Bun | 高性能 JS/TS 运行时与包管理 |
-| 状态管理 | Zustand | 1KB 级状态管理 |
-| UI 方案 | Tailwind CSS v4 + Radix UI | 原子化 CSS + 无样式组件 |
-| 代码规范 | ESLint + Prettier | 统一代码风格 |
-| 测试 | Vitest + Playwright | 单元测试 + E2E |
+| 桌面框架 | Wails v2.13 | Go 后端 + WebView 前端 |
+| 后端语言 | Go 1.25 | 高性能、跨平台编译 |
+| 数据库 | SQLite | 嵌入式数据库，零配置 |
+| 前端框架 | React 19 + TypeScript | UI 开发 |
+| 构建工具 | Vite 7 | 极快的 HMR 和构建速度 |
+| 包管理 | Bun | JS/TS 运行时与包管理 |
 
 ## 快速开始
 
 ### 环境要求
 
+- **Go** >= 1.25
+- **Wails CLI** >= 2.13
 - **Bun** >= 1.x
-- **Rust** >= 1.82
-- **Node.js** >= 20（Playwright 等工具需要）
 
 ### 安装依赖
 
 ```bash
-bun install
+go mod tidy
+cd frontend && bun install
 ```
 
 ### 开发模式
 
 ```bash
-# 仅启动前端
-bun run dev
-
-# 启动 Tauri 桌面应用（含热更新）
-bun run tauri:dev
+wails dev
 ```
 
 ### 构建
 
 ```bash
-bun run tauri:build
-```
-
-### 代码检查 & 格式化
-
-```bash
-bun run lint
-bun run format
-```
-
-### 测试
-
-```bash
-bun run test        # 单元测试
-bun run test:e2e    # E2E 测试
+wails build
 ```
 
 ## 项目结构
 
 ```
 Fishodo/
-├── src/                    # React 前端
-│   ├── components/         # 通用 UI 组件
-│   ├── features/           # 功能模块
-│   ├── hooks/              # 全局 Hooks
-│   ├── lib/                # 工具库
-│   ├── stores/             # 全局状态
-│   └── styles/             # 全局样式
-├── src-tauri/              # Tauri Rust 后端
-│   └── src/
-│       ├── commands/       # Tauri 命令
-│       └── db/             # 数据库层
-├── plugins/                # 插件目录
-├── tests/                  # 测试
-└── .github/workflows/      # CI/CD
+├── main.go              # Wails 应用入口
+├── app.go               # App 生命周期与方法绑定
+├── wails.json           # Wails 配置
+├── go.mod
+├── internal/            # Go 业务逻辑（按包拆分）
+├── frontend/            # React 前端
+│   ├── src/
+│   │   ├── App.tsx      # 根组件
+│   │   ├── main.tsx     # 前端入口
+│   │   └── style.css
+│   └── wailsjs/         # Wails 自动生成的 JS 绑定
+└── build/               # 构建产物（已 gitignore）
 ```
 
 ## 许可证

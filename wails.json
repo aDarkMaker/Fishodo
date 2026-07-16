@@ -1,0 +1,20 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "Fishodo",
+  "outputfilename": "Fishodo",
+  "frontend:install": "bun install",
+  "frontend:build": "bun run build",
+  "frontend:dev:watcher": "bun run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "aDarkMaker",
+    "email": "2261265112@qq.com"
+  },
+  "info": {
+    "companyName": "Fishodo",
+    "productName": "Fishodo",
+    "productVersion": "0.1.0",
+    "copyright": "GPLv3",
+    "comments": "摸鱼利器 — 轻量级 TODO List 桌面应用"
+  }
+}
